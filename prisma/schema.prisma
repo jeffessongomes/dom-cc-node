@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id         String    @id @default(uuid())
+  name       String?
+  ean        String
+  quantity   Decimal
+  created_at DateTime? @default(now())
+  collect    Collect   @relation(fields: [collectId], references: [id])
+  collectId  String
+
+  @@map("products")
+}
+
+model Collect {
+  id       String    @id @default(uuid())
+  title    String
+  finished Boolean   @default(false)
+  Product  Product[]
+
+  @@map("collections")
+}
+
+model Category {
+  id    String @id @default(uuid())
+  title String
+  slug  String @unique
+
+  @@map("categories")
+}

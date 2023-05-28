@@ -1,0 +1,32 @@
+{
+  "name": "dom-cc-node",
+  "version": "1.0.0",
+  "description": "Dom CC",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "tsx watch src/server.ts",
+    "start": "node build/server.js",
+    "build": "tsup src --out-dir build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rocketseat/eslint-config": "1.2.0",
+    "@types/node": "20.2.3",
+    "eslint": "8.41.0",
+    "prisma": "4.14.1",
+    "tsup": "6.7.0",
+    "tsx": "3.12.7",
+    "typescript": "5.0.4"
+  },
+  "dependencies": {
+    "@fastify/cors": "8.3.0",
+    "@prisma/client": "4.14.1",
+    "axios": "1.4.0",
+    "cors": "2.8.5",
+    "dotenv": "16.0.3",
+    "fastify": "4.17.0",
+    "zod": "3.21.4"
+  }
+}
