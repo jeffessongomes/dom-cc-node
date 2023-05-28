@@ -1,6 +1,7 @@
 import fastify from 'fastify'
 import { z } from 'zod'
 import cors from '@fastify/cors'
+import { brasilApi } from './services/api'
 import { prisma } from './lib/prisma'
 export const app = fastify()
 
@@ -51,11 +52,16 @@ app.post('/collect', async (request, reply) => {
   })
 
   if (!data) {
-    console.log(data)
+    const category = await prisma.category.findUnique({
+      where: {
+        slug: title,
+      },
+    })
 
     const { id } = await prisma.collect.create({
       data: {
         title,
+        categoryId: category.id,
       },
     })
     return reply.status(201).send({ id })
@@ -68,7 +74,7 @@ app.post('/product', async (request, reply) => {
   const { body = {} } = request
 
   const productBodySchema = z.object({
-    name: z.string(),
+    name: z.string().default('Sem nome'),
     ean: z.string(),
     quantity: z.number(),
     collectId: z.string(),
@@ -133,6 +139,38 @@ app.get('/collect', async (request, reply) => {
   return reply.status(200).send({ data })
 })
 
+app.get('/collectinfo/:collectId/', async (request, reply) => {
+  const { params = '' } = request
+
+  const collectParamsSchema = z.object({
+    collectId: z.string(),
+  })
+
+  const { collectId } = collectParamsSchema.parse(params)
+
+  const data = await prisma.collect.findUnique({
+    where: {
+      id: collectId,
+    },
+  })
+  return reply.status(200).send({ data })
+})
+
+app.put('/collect/:collectId/check', async (request, reply) => {
+  const { params } = request
+
+  await prisma.collect.update({
+    where: {
+      id: params.collectId,
+    },
+    data: {
+      checkCollect: true,
+    },
+  })
+
+  return reply.status(200).send()
+})
+
 app.get('/collect/:collectId', async (request, reply) => {
   const { params = '' } = request
 
@@ -156,4 +194,28 @@ app.get('/category', async (request, reply) => {
   const data = await prisma.category.findMany()
 
   return reply.status(200).send(data)
+})
+
+app.get('/category/:category/collect', async (request, reply) => {
+  const { params = '' } = request
+
+  const collections = await prisma.category
+    .findUnique({
+      where: {
+        slug: params.category,
+      },
+    })
+    .Collect()
+
+  return reply.status(200).send(collections)
+})
+
+app.get('/productinfo/:ean', async (request, reply) => {
+  const { params } = request
+
+  const { data } = await brasilApi.get(
+    `/mercadoria/consulta/?ean=${params.ean}&access-token=Pw0B1C5BGn-0qdmU0_c1qHCaRD5yPqyD&_format=json`,
+  )
+
+  return reply.status(200).send(data.return)
 })
